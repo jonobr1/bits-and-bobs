@@ -2,6 +2,7 @@
   font-family: "Pantograph Pro";
   src: local("Pantograph-Pro"), url("fonts/pantograph-variable-proportional-pro.ttf") format("truetype");
   font-weight: 100 1000;
+  font-display: swap;
 }
 * {
   margin: 0;

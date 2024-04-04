@@ -6,6 +6,7 @@ es.buildSync({
     path.resolve(__dirname, '../src/index.js')
   ],
   bundle: true,
+  minify: true,
   loader: { '.js': 'jsx' },
   outfile: path.resolve(__dirname, '../public/index.js')
 });
