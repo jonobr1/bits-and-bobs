@@ -16,6 +16,11 @@ html {
     font-size: 30px;
   }
 }
+@media screen and (min-width: 2000px) {
+  html {
+    font-size: 50px;
+  }
+}
 body {
   font-family: "Pantograph Pro", sans-serif;
   font-size: 1rem;
@@ -40,7 +45,7 @@ body h2 {
   font-size: 2rem;
   font-weight: 300;
   line-height: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
 }
 body .founded {
   font-variation-settings: "wdth" 50;
@@ -66,11 +71,11 @@ body a {
   text-decoration: none;
 }
 body p {
-  max-width: 360px;
+  max-width: 18rem;
   margin: 0 auto;
 }
 body .address {
-  max-width: 360px;
+  max-width: 18rem;
 }
 body .address span {
   display: block;
@@ -79,7 +84,7 @@ body .aux {
   display: flex;
 }
 body .aux > div + div {
-  margin-left: 30px;
+  margin-left: 1.5rem;
 }
 body #navigation {
   position: fixed;
@@ -87,7 +92,7 @@ body #navigation {
   left: 0;
   right: 0;
   bottom: 0;
-  margin: 20px;
+  margin: 1rem;
   pointer-events: none;
   z-index: 100;
 }
@@ -104,21 +109,21 @@ body #navigation .founded {
 }
 body section {
   position: relative;
-  width: calc(100vw - 40px);
-  height: calc(100vh - 80px);
-  padding: 60px 20px 20px;
+  width: calc(100vw - 2rem);
+  height: calc(100vh - 4rem);
+  padding: 3rem 1rem 1rem;
 }
 body .substack {
   position: relative;
-  padding-left: 24px;
+  padding-left: 1.125rem;
 }
 body .substack:before {
   display: block;
   position: absolute;
   top: 0;
   left: 0;
-  width: 20px;
-  height: 20px;
+  width: 1rem;
+  height: 1rem;
   content: "";
   background: url(images/substack.svg);
   background-size: 100%;
