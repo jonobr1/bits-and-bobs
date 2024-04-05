@@ -35,8 +35,13 @@ body #react {
   right: 0;
   bottom: 0;
   z-index: -1;
+  pointer-events: none;
 }
 body #react canvas {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
   opacity: 0;
   transition: opacity 1s ease-in-out;
 }
@@ -124,7 +129,6 @@ body #navigation .founded {
 }
 body section {
   position: relative;
-  width: calc(100vw - 2rem);
   height: calc(100vh - 4rem);
   padding: 3rem 1rem 1rem;
 }

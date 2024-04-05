@@ -37,7 +37,12 @@ body {
     right: 0;
     bottom: 0;
     z-index: -1;
+    pointer-events: none;
     canvas {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
       opacity: 0;
       transition: opacity 1s ease-in-out;
       &.ready {
@@ -132,12 +137,8 @@ body {
   }
   section {
     position: relative;
-    width: calc(100vw - 2rem);
     height: calc(100vh - 4rem);
     padding: 3rem 1rem 1rem;
-    // &:nth-child(even) {
-    //   background: rgba(0, 0, 0, 0.01);
-    // }
   }
 
   .substack {
