@@ -1,5 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
+import {
+  Color,
+  WebGLRenderer,
+  Scene,
+  Group,
+  PerspectiveCamera,
+  Fog,
+  HemisphereLight,
+  DirectionalLight,
+} from 'three';
 import { Token } from './token.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -10,7 +19,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 const TWO_PI = Math.PI * 2;
 const background = 0xbbccbb;
-const color = new THREE.Color();
+const color = new Color();
 const isMobile = navigator.maxTouchPoints > 0;
 
 export default function App() {
@@ -21,22 +30,18 @@ export default function App() {
   useEffect(mount, []);
 
   function mount() {
-    const renderer = new THREE.WebGLRenderer({
+    const renderer = new WebGLRenderer({
       canvas: domElement.current,
     });
-    const scene = new THREE.Scene();
-    const group = new THREE.Group();
-    const camera = new THREE.PerspectiveCamera(50);
+    const scene = new Scene();
+    const group = new Group();
+    const camera = new PerspectiveCamera(50);
 
     renderer.setClearColor(background);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
     camera.position.z = 10;
-    scene.fog = new THREE.Fog(
-      background,
-      camera.position.z,
-      camera.position.z + 4
-    );
+    scene.fog = new Fog(background, camera.position.z, camera.position.z + 4);
     scene.add(group);
 
     const composer = new EffectComposer(renderer);
@@ -77,13 +82,13 @@ export default function App() {
       group.add(token);
     }
 
-    const hemiLight = new THREE.HemisphereLight(background, background, 2);
+    const hemiLight = new HemisphereLight(background, background, 2);
     hemiLight.color.setHSL(0.6, 1, 0.6);
     hemiLight.groundColor.setHSL(0.095, 1, 0.75);
     hemiLight.position.set(0, 50, 0);
     scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(background, 3);
+    const dirLight = new DirectionalLight(background, 3);
     dirLight.color.setHSL(0.1, 1, 0.95);
     dirLight.position.set(-1, 1.75, 1);
     dirLight.position.multiplyScalar(30);

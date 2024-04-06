@@ -1,4 +1,11 @@
-import * as THREE from 'three';
+import {
+  LatheGeometry,
+  Path,
+  Mesh,
+  Texture,
+  MeshPhongMaterial,
+  DoubleSide,
+} from 'three';
 
 const segments = {
   cap: [0.5, 16],
@@ -6,7 +13,7 @@ const segments = {
 };
 const sizes = [0, 4];
 
-class TokenGeometry extends THREE.LatheGeometry {
+class TokenGeometry extends LatheGeometry {
   constructor(
     radius,
     length,
@@ -15,7 +22,7 @@ class TokenGeometry extends THREE.LatheGeometry {
     heightSegments,
     warpType
   ) {
-    const path = new THREE.Path();
+    const path = new Path();
 
     if (warpType === TokenGeometry.WARP_TYPES.BULGE) {
       path.absarc(0, -length / 2, 1.5 * radius, Math.PI * 1.5, 0);
@@ -79,7 +86,7 @@ class TokenGeometry extends THREE.LatheGeometry {
   }
 }
 
-export class Token extends THREE.Mesh {
+export class Token extends Mesh {
   isToken = true;
 
   constructor(colors) {
@@ -114,11 +121,11 @@ export class Token extends THREE.Mesh {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const texture = new THREE.Texture(canvas);
+    const texture = new Texture(canvas);
     texture.needsUpdate = true;
 
     const geometry = new TokenGeometry(radius, radius * size, sc, sr, 32, type);
-    const material = new THREE.MeshPhongMaterial({
+    const material = new MeshPhongMaterial({
       color: 0xffffff,
       map: texture,
       emissive: 0x000000,
@@ -128,7 +135,7 @@ export class Token extends THREE.Mesh {
       shininess: Math.pow(Math.random() * 100, 8),
       reflectivity: 1,
       refractionRatio: 0.98,
-      side: THREE.DoubleSide,
+      side: DoubleSide,
     });
     super(geometry, material);
 
