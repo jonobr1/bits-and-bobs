@@ -21662,7 +21662,7 @@ void main() {
       composer.addPass(new OutputPass());
       let h, s, l;
       const baseHue = Math.random();
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 200; i++) {
         h = clamp2(baseHue + 0.5 * Math.random() - 0.25, 0, 1);
         s = 1;
         l = 0.5 * Math.random() + 0.5;
