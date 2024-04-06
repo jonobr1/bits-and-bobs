@@ -9,4 +9,4 @@ const root = createRoot(domElement);
 domElement.id = 'react';
 document.body.insertBefore(domElement, seo);
 
-// root.render(<App />);
+root.render(<App />);
