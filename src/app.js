@@ -1,4 +1,3 @@
-import React, { useEffect, useRef, useState } from 'react';
 import {
   Color,
   WebGLRenderer,
@@ -8,6 +7,7 @@ import {
   Fog,
   HemisphereLight,
   DirectionalLight,
+  ShaderChunk,
 } from 'three';
 import { Token } from './token.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -21,18 +21,114 @@ const TWO_PI = Math.PI * 2;
 const background = 0xbbccbb;
 const color = new Color();
 const isMobile = navigator.maxTouchPoints > 0;
+let isMounted = false;
 
-export default function App() {
-  const domElement = useRef();
+ShaderChunk.shadowmap_pars_fragment.replace(
+  '#ifdef USE_SHADOWMAP',
+  `#ifdef USE_SHADOWMAP
+  #define LIGHT_WORLD_SIZE 0.005
+  #define LIGHT_FRUSTUM_WIDTH 3.75
+  #define LIGHT_SIZE_UV (LIGHT_WORLD_SIZE / LIGHT_FRUSTUM_WIDTH)
+  #define NEAR_PLANE 9.5
 
-  const [isMounted, setIsMounted] = useState(false);
+  #define NUM_SAMPLES 17
+  #define NUM_RINGS 11
+  #define BLOCKER_SEARCH_NUM_SAMPLES NUM_SAMPLES
 
-  useEffect(mount, []);
+  vec2 poissonDisk[NUM_SAMPLES];
+
+  void initPoissonSamples( const in vec2 randomSeed ) {
+    float ANGLE_STEP = PI2 * float( NUM_RINGS ) / float( NUM_SAMPLES );
+    float INV_NUM_SAMPLES = 1.0 / float( NUM_SAMPLES );
+
+    // jsfiddle that shows sample pattern: https://jsfiddle.net/a16ff1p7/
+    float angle = rand( randomSeed ) * PI2;
+    float radius = INV_NUM_SAMPLES;
+    float radiusStep = radius;
+
+    for( int i = 0; i < NUM_SAMPLES; i ++ ) {
+      poissonDisk[i] = vec2( cos( angle ), sin( angle ) ) * pow( radius, 0.75 );
+      radius += radiusStep;
+      angle += ANGLE_STEP;
+    }
+  }
+
+  float penumbraSize( const in float zReceiver, const in float zBlocker ) { // Parallel plane estimation
+    return (zReceiver - zBlocker) / zBlocker;
+  }
+
+  float findBlocker( sampler2D shadowMap, const in vec2 uv, const in float zReceiver ) {
+    // This uses similar triangles to compute what
+    // area of the shadow map we should search
+    float searchRadius = LIGHT_SIZE_UV * ( zReceiver - NEAR_PLANE ) / zReceiver;
+    float blockerDepthSum = 0.0;
+    int numBlockers = 0;
+
+    for( int i = 0; i < BLOCKER_SEARCH_NUM_SAMPLES; i++ ) {
+      float shadowMapDepth = unpackRGBAToDepth(texture2D(shadowMap, uv + poissonDisk[i] * searchRadius));
+      if ( shadowMapDepth < zReceiver ) {
+        blockerDepthSum += shadowMapDepth;
+        numBlockers ++;
+      }
+    }
+
+    if( numBlockers == 0 ) return -1.0;
+
+    return blockerDepthSum / float( numBlockers );
+  }
+
+  float PCF_Filter(sampler2D shadowMap, vec2 uv, float zReceiver, float filterRadius ) {
+    float sum = 0.0;
+    float depth;
+    #pragma unroll_loop_start
+    for( int i = 0; i < 17; i ++ ) {
+      depth = unpackRGBAToDepth( texture2D( shadowMap, uv + poissonDisk[ i ] * filterRadius ) );
+      if( zReceiver <= depth ) sum += 1.0;
+    }
+    #pragma unroll_loop_end
+    #pragma unroll_loop_start
+    for( int i = 0; i < 17; i ++ ) {
+      depth = unpackRGBAToDepth( texture2D( shadowMap, uv + -poissonDisk[ i ].yx * filterRadius ) );
+      if( zReceiver <= depth ) sum += 1.0;
+    }
+    #pragma unroll_loop_end
+    return sum / ( 2.0 * float( 17 ) );
+  }
+
+  float PCSS ( sampler2D shadowMap, vec4 coords ) {
+    vec2 uv = coords.xy;
+    float zReceiver = coords.z; // Assumed to be eye-space z in this code
+
+    initPoissonSamples( uv );
+    // STEP 1: blocker search
+    float avgBlockerDepth = findBlocker( shadowMap, uv, zReceiver );
+
+    //There are no occluders so early out (this saves filtering)
+    if( avgBlockerDepth == -1.0 ) return 1.0;
+
+    // STEP 2: penumbra size
+    float penumbraRatio = penumbraSize( zReceiver, avgBlockerDepth );
+    float filterRadius = penumbraRatio * LIGHT_SIZE_UV * NEAR_PLANE / zReceiver;
+
+    // STEP 3: filtering
+    //return avgBlockerDepth;
+    return PCF_Filter( shadowMap, uv, zReceiver, filterRadius );
+  }`
+);
+
+ShaderChunk.shadowmap_pars_fragment.replace(
+  '#if defined( SHADOWMAP_TYPE_PCF )',
+  `return PCSS( shadowMap, shadowCoord );
+  #if defined( SHADOWMAP_TYPE_PCF )`
+);
+
+export default function App(domElement) {
+  if (!isMounted) {
+    return mount();
+  }
 
   function mount() {
-    const renderer = new WebGLRenderer({
-      canvas: domElement.current,
-    });
+    const renderer = new WebGLRenderer();
     const scene = new Scene();
     const group = new Group();
     const camera = new PerspectiveCamera(50);
@@ -59,7 +155,7 @@ export default function App() {
 
     let h, s, l;
     const baseHue = Math.random();
-    for (let i = 0; i < 250; i++) {
+    for (let i = 0; i < 100; i++) {
       h = clamp(baseHue + 0.5 * Math.random() - 0.25, 0, 1);
       s = 1;
       l = 0.5 * Math.random() + 0.5;
@@ -94,20 +190,36 @@ export default function App() {
     dirLight.position.multiplyScalar(30);
     scene.add(dirLight);
 
-    dirLight.shadow.mapSize.width = isMobile ? 256 : 1024;
-    dirLight.shadow.mapSize.height = isMobile ? 256 : 1024;
+    dirLight.shadow.mapSize.width = isMobile ? 512 : 2048;
+    dirLight.shadow.mapSize.height = isMobile ? 512 : 2048;
+
+    const dist = 1024;
+
+    dirLight.shadow.camera.left = -dist;
+    dirLight.shadow.camera.right = dist;
+    dirLight.shadow.camera.top = dist;
+    dirLight.shadow.camera.bottom = -dist;
+
+    dirLight.shadow.camera.near = 0.1;
+    dirLight.shadow.camera.far = 25;
+    dirLight.shadow.bias = -0.0001;
     dirLight.castShadow = true;
 
+    domElement.appendChild(renderer.domElement);
     window.addEventListener('resize', resize);
     resize();
 
     renderer.setAnimationLoop(update);
-    requestAnimationFrame(() => setIsMounted(true));
-
+    requestAnimationFrame(() => {
+      domElement.classList.add('ready');
+      isMounted = true;
+    });
     return unmount;
 
     function unmount() {
+      domElement.removeChild(renderer.domElement);
       renderer.setAnimationLoop(null);
+      composer.dispose();
     }
 
     function resize() {
@@ -122,15 +234,11 @@ export default function App() {
     }
 
     function update(elapsed) {
-      camera.position.y = -window.scrollY * 0.001;
+      camera.position.y -= (window.scrollY * 0.001 + camera.position.y) * 0.3;
       group.rotation.y = (-0.01 * elapsed) / 1000;
       composer.render();
     }
   }
-
-  return (
-    <canvas className={[isMounted ? 'ready' : ''].join(' ')} ref={domElement} />
-  );
 }
 
 function clamp(v, min, max) {

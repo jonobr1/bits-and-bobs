@@ -1,15 +1,8 @@
-import {
-  LatheGeometry,
-  Path,
-  Mesh,
-  Texture,
-  MeshPhongMaterial,
-  DoubleSide,
-} from 'three';
+import { LatheGeometry, Path, Mesh, Texture, MeshPhongMaterial } from 'three';
 
 const segments = {
-  cap: [0.5, 16],
-  radial: [4, 32],
+  cap: [0.5, 64],
+  radial: [4, 64],
 };
 const sizes = [0, 4];
 
@@ -23,13 +16,14 @@ class TokenGeometry extends LatheGeometry {
     warpType
   ) {
     const path = new Path();
+    const height = length;
 
     if (warpType === TokenGeometry.WARP_TYPES.BULGE) {
       path.absarc(0, -length / 2, 1.5 * radius, Math.PI * 1.5, 0);
       for (let i = 0; i < heightSegments; i++) {
         const pct = i / heightSegments;
         let x = radius;
-        let y = length * pct - length / 2;
+        let y = height * pct - height / 2;
         if (pct < 0.5) {
           x = lerp(radius * 1.5, radius, 2 * pct);
         }
@@ -43,7 +37,7 @@ class TokenGeometry extends LatheGeometry {
       for (let i = 0; i < heightSegments; i++) {
         const pct = i / heightSegments;
         let x = radius;
-        let y = length * pct - length / 2;
+        let y = height * pct - height / 2;
         if (warpType === TokenGeometry.WARP_TYPES.PINCH) {
           if (pct < 0.5) {
             x = lerp(radius, radius * 0.5, 2 * pct);
@@ -132,10 +126,9 @@ export class Token extends Mesh {
       specular: 0x111111,
       fog: true,
       flatShading: sc < 1,
-      shininess: Math.pow(Math.random() * 100, 8),
-      reflectivity: 1,
-      refractionRatio: 0.98,
-      side: DoubleSide,
+      shininess: 0,
+      reflectivity: 0,
+      refractionRatio: 0,
     });
     super(geometry, material);
 
