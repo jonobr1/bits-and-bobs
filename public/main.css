@@ -48,10 +48,10 @@ body #app canvas {
 body #app.ready {
   opacity: 1;
 }
-body #wordmark span {
+body #wordmark > span {
   display: block;
 }
-body #wordmark span:last-child {
+body #wordmark > span:last-child {
   position: absolute;
   right: 0;
   bottom: 0;
