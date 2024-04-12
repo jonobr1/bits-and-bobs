@@ -149,6 +149,7 @@ body .substack:before {
   background-position: center;
   background-repeat: no-repeat;
 }
+.scripts,
 .hidden {
   display: none;
 }
