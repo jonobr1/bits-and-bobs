@@ -149,4 +149,7 @@ body .substack:before {
   background-position: center;
   background-repeat: no-repeat;
 }
+.hidden {
+  display: none;
+}
 /*# sourceMappingURL=main.css.map */
