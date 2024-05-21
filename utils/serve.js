@@ -6,12 +6,10 @@ es.context({
   bundle: true,
   loader: { '.js': 'jsx' },
   external: ['./images/*', './fonts/*'],
-  sourcemap: true
+  sourcemap: true,
 }).then((ctx) => {
-
   ctx.serve({
     port: 8080,
-    servedir: 'public'
+    servedir: 'public',
   });
-
 });

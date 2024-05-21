@@ -155,28 +155,6 @@ export default function App(domElement) {
 
     let h, s, l;
     const baseHue = Math.random();
-    for (let i = 0; i < 200; i++) {
-      h = clamp(baseHue + 0.5 * Math.random() - 0.25, 0, 1);
-      s = 1;
-      l = 0.5 * Math.random() + 0.5;
-      const top = '#' + color.setHSL(h, s, l).getHexString();
-
-      h = mod(h + 0.5 * Math.random() - 0.25, 1);
-      l = clamp(l - Math.random() * 0.25, 0, 1);
-      const bottom = '#' + color.setHSL(h, s, l).getHexString();
-
-      const token = new Token([top, bottom]);
-
-      token.position.x = 9 * (2 * Math.random() - 1);
-      token.position.y = 9 * (2 * Math.random() - 1);
-      token.position.z = 9 * (2 * Math.random() - 1);
-
-      token.rotation.x = Math.random() * TWO_PI;
-      token.rotation.y = Math.random() * TWO_PI;
-      token.rotation.z = Math.random() * TWO_PI;
-
-      group.add(token);
-    }
 
     const hemiLight = new HemisphereLight(background, background, 2);
     hemiLight.color.setHSL(0.6, 1, 0.6);
@@ -210,10 +188,6 @@ export default function App(domElement) {
     resize();
 
     renderer.setAnimationLoop(update);
-    requestAnimationFrame(() => {
-      domElement.classList.add('ready');
-      isMounted = true;
-    });
     return unmount;
 
     function unmount() {
@@ -234,6 +208,33 @@ export default function App(domElement) {
     }
 
     function update(elapsed) {
+      if (group.children.length < 200) {
+        h = clamp(baseHue + 0.5 * Math.random() - 0.25, 0, 1);
+        s = 1;
+        l = 0.5 * Math.random() + 0.5;
+        const top = '#' + color.setHSL(h, s, l).getHexString();
+
+        h = mod(h + 0.5 * Math.random() - 0.25, 1);
+        l = clamp(l - Math.random() * 0.25, 0, 1);
+        const bottom = '#' + color.setHSL(h, s, l).getHexString();
+
+        const token = new Token([top, bottom]);
+
+        token.position.x = 9 * (2 * Math.random() - 1);
+        token.position.y = 9 * (2 * Math.random() - 1);
+        token.position.z = 9 * (2 * Math.random() - 1);
+
+        token.rotation.x = Math.random() * TWO_PI;
+        token.rotation.y = Math.random() * TWO_PI;
+        token.rotation.z = Math.random() * TWO_PI;
+
+        group.add(token);
+      } else if (!isMounted) {
+        requestAnimationFrame(() => {
+          domElement.classList.add('ready');
+          isMounted = true;
+        });
+      }
       camera.position.y -= (window.scrollY * 0.001 + camera.position.y) * 0.3;
       group.rotation.y = (-0.01 * elapsed) / 1000;
       composer.render();
