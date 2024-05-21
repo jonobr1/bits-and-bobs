@@ -6,6 +6,8 @@ const segments = {
 };
 const sizes = [0, 4];
 
+// TODO: Move to an encapsulated model or SDF
+// to improve page loads
 class TokenGeometry extends LatheGeometry {
   constructor(
     radius,
