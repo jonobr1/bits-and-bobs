@@ -1,4 +1,10 @@
-import { LatheGeometry, Path, Mesh, Texture, MeshPhongMaterial } from 'three';
+import {
+  LatheGeometry,
+  Path,
+  Mesh,
+  Texture,
+  MeshPhysicalMaterial,
+} from 'three';
 
 const segments = {
   cap: [0.5, 64],
@@ -121,7 +127,7 @@ export class Token extends Mesh {
     texture.needsUpdate = true;
 
     const geometry = new TokenGeometry(radius, radius * size, sc, sr, 32, type);
-    const material = new MeshPhongMaterial({
+    const material = new MeshPhysicalMaterial({
       color: 0xffffff,
       map: texture,
       emissive: 0x000000,
