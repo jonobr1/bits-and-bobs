@@ -8,6 +8,7 @@ import {
   HemisphereLight,
   DirectionalLight,
   ShaderChunk,
+  PCFSoftShadowMap,
 } from 'three';
 import { Token } from './token.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -136,6 +137,7 @@ export default function App(domElement) {
     renderer.setClearColor(background);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = PCFSoftShadowMap;
     camera.position.z = 10;
     scene.fog = new Fog(background, camera.position.z, camera.position.z + 4);
     scene.add(group);
@@ -164,14 +166,14 @@ export default function App(domElement) {
 
     const dirLight = new DirectionalLight(background, 3);
     dirLight.color.setHSL(0.1, 1, 0.95);
-    dirLight.position.set(-1, 1.75, 1);
-    dirLight.position.multiplyScalar(30);
+    dirLight.position.set(-1, 2, -0.5);
+    dirLight.position.multiplyScalar(15);
     scene.add(dirLight);
 
     dirLight.shadow.mapSize.width = isMobile ? 512 : 2048;
     dirLight.shadow.mapSize.height = isMobile ? 512 : 2048;
 
-    const dist = 1024;
+    const dist = 1;
 
     dirLight.shadow.camera.left = -dist;
     dirLight.shadow.camera.right = dist;
@@ -179,8 +181,7 @@ export default function App(domElement) {
     dirLight.shadow.camera.bottom = -dist;
 
     dirLight.shadow.camera.near = 0.1;
-    dirLight.shadow.camera.far = 25;
-    dirLight.shadow.bias = -0.0001;
+    dirLight.shadow.camera.far = 50;
     dirLight.castShadow = true;
 
     domElement.appendChild(renderer.domElement);
