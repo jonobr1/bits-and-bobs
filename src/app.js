@@ -182,6 +182,7 @@ export default function App(domElement) {
 
     dirLight.shadow.camera.near = 0.1;
     dirLight.shadow.camera.far = 50;
+    dirLight.shadow.bias = -0.001;
     dirLight.castShadow = true;
 
     domElement.appendChild(renderer.domElement);
