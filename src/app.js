@@ -208,7 +208,7 @@ export default function App(domElement) {
     }
 
     function update(elapsed) {
-      if (group.children.length < 200) {
+      if (group.children.length < 50) {
         h = clamp(baseHue + 0.5 * Math.random() - 0.25, 0, 1);
         s = 1;
         l = 0.5 * Math.random() + 0.5;
@@ -220,9 +220,22 @@ export default function App(domElement) {
 
         const token = new Token([top, bottom]);
 
-        token.position.x = 9 * (2 * Math.random() - 1);
-        token.position.y = 9 * (2 * Math.random() - 1);
-        token.position.z = 9 * (2 * Math.random() - 1);
+        // Use Three.js built-in bounding sphere calculation
+        token.geometry.computeBoundingSphere();
+        const boundingSphereRadius = token.geometry.boundingSphere.radius;
+
+        // Ensure minimum distance from camera considering near plane
+        const cameraDistance = camera.position.z;
+        const nearPlane = camera.near || 0.1;
+        const minDistanceFromCamera = nearPlane + boundingSphereRadius;
+        const maxDistanceFromCamera = cameraDistance - minDistanceFromCamera;
+
+        // Generate random position within spherical volume, ensuring minimum distance
+        const phi = Math.random() * TWO_PI;
+        const theta = Math.random() * Math.PI;
+        const radius = Math.pow(Math.random(), 0.3) * maxDistanceFromCamera;
+
+        token.position.setFromSphericalCoords(radius, phi, theta);
 
         token.rotation.x = Math.random() * TWO_PI;
         token.rotation.y = Math.random() * TWO_PI;
