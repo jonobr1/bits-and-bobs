@@ -38,6 +38,7 @@ body {
     bottom: 0;
     z-index: -1;
     pointer-events: none;
+    touch-action: none;
     opacity: 0;
     transition: opacity 1s ease-in-out;
     overflow: hidden;
@@ -119,14 +120,14 @@ body {
 
   #navigation {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: 1rem;
+    top: 1rem;
+    left: 1rem;
+    width: calc(100svw - 2rem);
+    height: calc(100svh - 2rem);
+    margin: 0;
     pointer-events: none;
+    touch-action: none;
     z-index: 100;
-    display: none;
     h1 {
       position: absolute;
       left: 0;
