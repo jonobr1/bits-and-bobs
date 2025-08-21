@@ -118,6 +118,7 @@ body #navigation {
   margin: 1rem;
   pointer-events: none;
   z-index: 100;
+  display: none;
 }
 body #navigation h1 {
   position: absolute;

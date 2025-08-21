@@ -139,7 +139,6 @@ export default function App(domElement) {
     temp.style.visibility = 'hidden';
     temp.style.zIndex = -1;
     temp.style.pointerEvents = 'none';
-    document.body.appendChild(temp);
 
     const renderer = new WebGLRenderer();
     const scene = new Scene();
@@ -182,8 +181,8 @@ export default function App(domElement) {
     dirLight.position.multiplyScalar(15);
     scene.add(dirLight);
 
-    dirLight.shadow.mapSize.width = isMobile ? 512 : 2048;
-    dirLight.shadow.mapSize.height = isMobile ? 512 : 2048;
+    dirLight.shadow.mapSize.width = isMobile ? 512 : 1024;
+    dirLight.shadow.mapSize.height = isMobile ? 512 : 1024;
 
     const dist = 1;
 
@@ -197,6 +196,7 @@ export default function App(domElement) {
     dirLight.shadow.bias = -0.001;
     dirLight.castShadow = true;
 
+    domElement.appendChild(temp);
     domElement.appendChild(renderer.domElement);
     window.addEventListener('resize', resize);
     resize();
@@ -267,8 +267,7 @@ export default function App(domElement) {
           isMounted = true;
         });
       }
-      const page = Math.round(window.scrollY / window.innerHeight);
-      camera.position.y -= (page + camera.position.y) * drag;
+      camera.position.y -= (window.scrollY * 0.001 + camera.position.y) * drag;
       group.rotation.y = (-0.01 * elapsed) / 1000;
       composer.render();
       previousElapsed = elapsed;

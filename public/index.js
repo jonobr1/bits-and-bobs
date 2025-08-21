@@ -28490,7 +28490,6 @@ void main() {
       temp.style.visibility = "hidden";
       temp.style.zIndex = -1;
       temp.style.pointerEvents = "none";
-      document.body.appendChild(temp);
       const renderer = new WebGLRenderer();
       const scene = new Scene();
       const group = new Group();
@@ -28525,8 +28524,8 @@ void main() {
       dirLight.position.set(-1, 2, -0.5);
       dirLight.position.multiplyScalar(15);
       scene.add(dirLight);
-      dirLight.shadow.mapSize.width = isMobile ? 512 : 2048;
-      dirLight.shadow.mapSize.height = isMobile ? 512 : 2048;
+      dirLight.shadow.mapSize.width = isMobile ? 512 : 1024;
+      dirLight.shadow.mapSize.height = isMobile ? 512 : 1024;
       const dist = 1;
       dirLight.shadow.camera.left = -dist;
       dirLight.shadow.camera.right = dist;
@@ -28536,6 +28535,7 @@ void main() {
       dirLight.shadow.camera.far = 50;
       dirLight.shadow.bias = -1e-3;
       dirLight.castShadow = true;
+      domElement2.appendChild(temp);
       domElement2.appendChild(renderer.domElement);
       window.addEventListener("resize", resize);
       resize();
@@ -28590,8 +28590,7 @@ void main() {
             isMounted = true;
           });
         }
-        const page = Math.round(window.scrollY / window.innerHeight);
-        camera.position.y -= (page + camera.position.y) * drag;
+        camera.position.y -= (window.scrollY * 1e-3 + camera.position.y) * drag;
         group.rotation.y = -0.01 * elapsed / 1e3;
         composer.render();
         previousElapsed = elapsed;
