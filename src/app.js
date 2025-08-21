@@ -133,6 +133,9 @@ export default function App(domElement) {
     const scene = new Scene();
     const group = new Group();
     const camera = new PerspectiveCamera(50);
+    let scrollY = 0;
+    let isScrolling = false;
+    let scrollTimeout;
 
     renderer.setClearColor(background);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -187,6 +190,7 @@ export default function App(domElement) {
 
     domElement.appendChild(renderer.domElement);
     window.addEventListener('resize', resize);
+    window.addEventListener('scroll', onScroll, { passive: true });
     resize();
 
     renderer.setAnimationLoop(update);
@@ -195,7 +199,27 @@ export default function App(domElement) {
     function unmount() {
       domElement.removeChild(renderer.domElement);
       renderer.setAnimationLoop(null);
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('scroll', onScroll);
       composer.dispose();
+    }
+
+    function onScroll() {
+      scrollY = window.scrollY;
+      if (!isScrolling) {
+        isScrolling = true;
+        requestAnimationFrame(handleScrollUpdate);
+      }
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+      }, 100);
+    }
+
+    function handleScrollUpdate() {
+      if (isScrolling) {
+        requestAnimationFrame(handleScrollUpdate);
+      }
     }
 
     function resize() {
@@ -250,7 +274,7 @@ export default function App(domElement) {
           isMounted = true;
         });
       }
-      camera.position.y -= (window.scrollY * 0.001 + camera.position.y) * 0.3;
+      camera.position.y -= (scrollY * 0.001 + camera.position.y) * 0.3;
       group.rotation.y = (-0.01 * elapsed) / 1000;
       composer.render();
     }

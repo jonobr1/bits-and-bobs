@@ -28484,6 +28484,9 @@ void main() {
       const scene = new Scene();
       const group = new Group();
       const camera = new PerspectiveCamera(50);
+      let scrollY = 0;
+      let isScrolling = false;
+      let scrollTimeout;
       renderer.setClearColor(background);
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.shadowMap.enabled = true;
@@ -28527,13 +28530,32 @@ void main() {
       dirLight.castShadow = true;
       domElement2.appendChild(renderer.domElement);
       window.addEventListener("resize", resize);
+      window.addEventListener("scroll", onScroll, { passive: true });
       resize();
       renderer.setAnimationLoop(update);
       return unmount;
       function unmount() {
         domElement2.removeChild(renderer.domElement);
         renderer.setAnimationLoop(null);
+        window.removeEventListener("resize", resize);
+        window.removeEventListener("scroll", onScroll);
         composer.dispose();
+      }
+      function onScroll() {
+        scrollY = window.scrollY;
+        if (!isScrolling) {
+          isScrolling = true;
+          requestAnimationFrame(handleScrollUpdate);
+        }
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          isScrolling = false;
+        }, 100);
+      }
+      function handleScrollUpdate() {
+        if (isScrolling) {
+          requestAnimationFrame(handleScrollUpdate);
+        }
       }
       function resize() {
         const width = window.innerWidth;
@@ -28575,7 +28597,7 @@ void main() {
             isMounted = true;
           });
         }
-        camera.position.y -= (window.scrollY * 1e-3 + camera.position.y) * 0.3;
+        camera.position.y -= (scrollY * 1e-3 + camera.position.y) * 0.3;
         group.rotation.y = -0.01 * elapsed / 1e3;
         composer.render();
       }
