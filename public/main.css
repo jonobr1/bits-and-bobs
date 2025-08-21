@@ -27,6 +27,7 @@ body {
   line-height: 115%;
   font-weight: 400;
   color: #000;
+  -webkit-overflow-scrolling: touch;
 }
 body #app {
   position: fixed;
