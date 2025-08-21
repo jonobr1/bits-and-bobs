@@ -134,6 +134,8 @@ export default function App(domElement) {
     temp.style.width = '100lvw';
     temp.style.height = '100lvh';
     temp.style.position = 'absolute';
+    temp.style.top = 0;
+    temp.style.left = 0;
     temp.style.visibility = 'hidden';
     temp.style.zIndex = -1;
     temp.style.pointerEvents = 'none';
@@ -224,7 +226,7 @@ export default function App(domElement) {
 
     function update(elapsed) {
       const timeDelta = elapsed - previousElapsed;
-      const drag = timeDelta / 25;
+      const drag = timeDelta / 250;
       if (group.children.length < 50) {
         h = clamp(baseHue + 0.5 * Math.random() - 0.25, 0, 1);
         s = 1;
@@ -265,7 +267,8 @@ export default function App(domElement) {
           isMounted = true;
         });
       }
-      // camera.position.y -= (window.scrollY * 0.001 + camera.position.y) * drag;
+      const page = Math.round(window.scrollY / window.innerHeight);
+      camera.position.y -= (page + camera.position.y) * drag;
       group.rotation.y = (-0.01 * elapsed) / 1000;
       composer.render();
       previousElapsed = elapsed;
