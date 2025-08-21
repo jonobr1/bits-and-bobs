@@ -28545,17 +28545,13 @@ void main() {
         scrollY = window.scrollY;
         if (!isScrolling) {
           isScrolling = true;
-          requestAnimationFrame(handleScrollUpdate);
+          resize();
+          update();
         }
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
           isScrolling = false;
         }, 100);
-      }
-      function handleScrollUpdate() {
-        if (isScrolling) {
-          requestAnimationFrame(handleScrollUpdate);
-        }
       }
       function resize() {
         const width = window.innerWidth;
@@ -28598,7 +28594,9 @@ void main() {
           });
         }
         camera.position.y -= (scrollY * 1e-3 + camera.position.y) * 0.3;
-        group.rotation.y = -0.01 * elapsed / 1e3;
+        if (typeof elapsed === "number") {
+          group.rotation.y = -0.01 * elapsed / 1e3;
+        }
         composer.render();
       }
     }

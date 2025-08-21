@@ -208,18 +208,13 @@ export default function App(domElement) {
       scrollY = window.scrollY;
       if (!isScrolling) {
         isScrolling = true;
-        requestAnimationFrame(handleScrollUpdate);
+        resize();
+        update();
       }
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         isScrolling = false;
       }, 100);
-    }
-
-    function handleScrollUpdate() {
-      if (isScrolling) {
-        requestAnimationFrame(handleScrollUpdate);
-      }
     }
 
     function resize() {
@@ -275,7 +270,9 @@ export default function App(domElement) {
         });
       }
       camera.position.y -= (scrollY * 0.001 + camera.position.y) * 0.3;
-      group.rotation.y = (-0.01 * elapsed) / 1000;
+      if (typeof elapsed === 'number') {
+        group.rotation.y = (-0.01 * elapsed) / 1000;
+      }
       composer.render();
     }
   }
