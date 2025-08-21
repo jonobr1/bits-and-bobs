@@ -265,7 +265,8 @@ export default function App(domElement) {
           isMounted = true;
         });
       }
-      camera.position.y -= (window.scrollY * 0.001 + camera.position.y) * drag;
+      // camera.position.y -= (window.scrollY * 0.001 + camera.position.y) * drag;
+      camera.position.y = -window.scrollY / 1000;
       group.rotation.y = (-0.01 * elapsed) / 1000;
       composer.render();
       previousElapsed = elapsed;
