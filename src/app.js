@@ -129,6 +129,16 @@ export default function App(domElement) {
   }
 
   function mount() {
+    // Create a temporary element to calculate lvw/lvh values
+    const temp = document.createElement('div');
+    temp.style.width = '100lvw';
+    temp.style.height = '100lvh';
+    temp.style.position = 'absolute';
+    temp.style.visibility = 'hidden';
+    temp.style.zIndex = -1;
+    temp.style.pointerEvents = 'none';
+    document.body.appendChild(temp);
+
     const renderer = new WebGLRenderer();
     const scene = new Scene();
     const group = new Group();
@@ -208,7 +218,6 @@ export default function App(domElement) {
       scrollY = window.scrollY;
       if (!isScrolling) {
         isScrolling = true;
-        resize();
         update();
       }
       clearTimeout(scrollTimeout);
@@ -218,8 +227,10 @@ export default function App(domElement) {
     }
 
     function resize() {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
+      const computedStyle = getComputedStyle(temp);
+      const width = parseFloat(computedStyle.width) || window.innerWidth;
+      const height = parseFloat(computedStyle.height) || window.innerHeight;
+
       renderer.setSize(width, height);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();

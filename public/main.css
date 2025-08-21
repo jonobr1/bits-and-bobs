@@ -38,14 +38,15 @@ body #app {
   pointer-events: none;
   opacity: 0;
   transition: opacity 1s ease-in-out;
+  overflow: hidden;
 }
 body #app canvas {
   display: block;
   position: absolute;
   top: 0;
   left: 0;
-  width: 100% !important;
-  height: 100% !important;
+  width: 100lvw;
+  height: 100lvh;
 }
 body #app.ready {
   opacity: 1;

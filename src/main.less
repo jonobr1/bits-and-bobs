@@ -40,13 +40,14 @@ body {
     pointer-events: none;
     opacity: 0;
     transition: opacity 1s ease-in-out;
+    overflow: hidden;
     canvas {
       display: block;
       position: absolute;
       top: 0;
       left: 0;
-      width: 100% !important;
-      height: 100% !important;
+      width: 100lvw;
+      height: 100lvh;
     }
     &.ready {
       opacity: 1;
@@ -62,9 +63,6 @@ body {
         bottom: 0;
       }
     }
-    // #ampersand {
-    //   background: red;
-    // }
   }
   h1 {
     font-weight: 700;
