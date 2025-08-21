@@ -28588,7 +28588,6 @@ void main() {
             isMounted = true;
           });
         }
-        camera.position.y = -window.scrollY / 1e3;
         group.rotation.y = -0.01 * elapsed / 1e3;
         composer.render();
         previousElapsed = elapsed;
