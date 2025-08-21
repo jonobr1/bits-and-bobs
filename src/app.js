@@ -22,6 +22,7 @@ const TWO_PI = Math.PI * 2;
 const background = 0xbbccbb;
 const color = new Color();
 const isMobile = navigator.maxTouchPoints > 0;
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 let isMounted = false;
 
 ShaderChunk.shadowmap_pars_fragment.replace(
@@ -123,13 +124,15 @@ ShaderChunk.shadowmap_pars_fragment.replace(
   #if defined( SHADOWMAP_TYPE_PCF )`
 );
 
-export default function App(domElement) {
+export default function App(domElement, scrollContainer) {
   if (!isMounted) {
     return mount();
   }
 
   function mount() {
     let previousElapsed = 0;
+    let targetScrollY = 0;
+    let currentScrollY = 0;
     const temp = document.createElement('div');
     temp.style.width = '100lvw';
     temp.style.height = '100lvh';
@@ -139,13 +142,17 @@ export default function App(domElement) {
     temp.style.pointerEvents = 'none';
     document.body.appendChild(temp);
 
-    const renderer = new WebGLRenderer();
+    const renderer = new WebGLRenderer({
+      antialias: isIOS ? false : true, // Disable antialiasing on iOS for better performance
+      powerPreference: isMobile ? "low-power" : "high-performance"
+    });
     const scene = new Scene();
     const group = new Group();
     const camera = new PerspectiveCamera(50);
 
     renderer.setClearColor(background);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    // Limit pixel ratio on iOS to improve performance
+    renderer.setPixelRatio(isIOS ? Math.min(window.devicePixelRatio, 2) : window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
     camera.position.z = 10;
@@ -180,8 +187,10 @@ export default function App(domElement) {
     dirLight.position.multiplyScalar(15);
     scene.add(dirLight);
 
-    dirLight.shadow.mapSize.width = isMobile ? 512 : 2048;
-    dirLight.shadow.mapSize.height = isMobile ? 512 : 2048;
+    // Further reduce shadow map size on iOS for better performance
+    const shadowMapSize = isIOS ? 256 : (isMobile ? 512 : 2048);
+    dirLight.shadow.mapSize.width = shadowMapSize;
+    dirLight.shadow.mapSize.height = shadowMapSize;
 
     const dist = 1;
 
@@ -197,6 +206,7 @@ export default function App(domElement) {
 
     domElement.appendChild(renderer.domElement);
     window.addEventListener('resize', resize);
+    scrollContainer.addEventListener('scroll', onScroll, { passive: true });
     resize();
 
     renderer.setAnimationLoop(update);
@@ -206,7 +216,12 @@ export default function App(domElement) {
       domElement.removeChild(renderer.domElement);
       renderer.setAnimationLoop(null);
       window.removeEventListener('resize', resize);
+      scrollContainer.removeEventListener('scroll', onScroll);
       composer.dispose();
+    }
+
+    function onScroll() {
+      targetScrollY = scrollContainer.scrollTop;
     }
 
     function resize() {
@@ -265,7 +280,10 @@ export default function App(domElement) {
           isMounted = true;
         });
       }
-      camera.position.y -= (window.scrollY * 0.001 + camera.position.y) * drag;
+      // Smooth scroll position tweening for iOS momentum scrolling
+      const scrollLerpFactor = 0.1;
+      currentScrollY += (targetScrollY - currentScrollY) * scrollLerpFactor;
+      camera.position.y -= (currentScrollY * 0.001 + camera.position.y) * drag;
       group.rotation.y = (-0.01 * elapsed) / 1000;
       composer.render();
       previousElapsed = elapsed;
