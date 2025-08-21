@@ -28480,6 +28480,7 @@ void main() {
       return mount();
     }
     function mount() {
+      let previousElapsed = 0;
       const temp = document.createElement("div");
       temp.style.width = "100lvw";
       temp.style.height = "100lvh";
@@ -28492,9 +28493,6 @@ void main() {
       const scene = new Scene();
       const group = new Group();
       const camera = new PerspectiveCamera(50);
-      let scrollY = 0;
-      let isScrolling = false;
-      let scrollTimeout;
       renderer.setClearColor(background);
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.shadowMap.enabled = true;
@@ -28538,7 +28536,6 @@ void main() {
       dirLight.castShadow = true;
       domElement2.appendChild(renderer.domElement);
       window.addEventListener("resize", resize);
-      window.addEventListener("scroll", onScroll, { passive: true });
       resize();
       renderer.setAnimationLoop(update);
       return unmount;
@@ -28546,19 +28543,7 @@ void main() {
         domElement2.removeChild(renderer.domElement);
         renderer.setAnimationLoop(null);
         window.removeEventListener("resize", resize);
-        window.removeEventListener("scroll", onScroll);
         composer.dispose();
-      }
-      function onScroll() {
-        scrollY = window.scrollY;
-        if (!isScrolling) {
-          isScrolling = true;
-          update();
-        }
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-          isScrolling = false;
-        }, 100);
       }
       function resize() {
         const computedStyle = getComputedStyle(temp);
@@ -28572,6 +28557,8 @@ void main() {
         fxaa.uniforms.resolution.value.y = 1 / height;
       }
       function update(elapsed) {
+        const timeDelta = elapsed - previousElapsed;
+        const drag = timeDelta / 25;
         if (group.children.length < 50) {
           h = clamp2(baseHue + 0.5 * Math.random() - 0.25, 0, 1);
           s = 1;
@@ -28601,11 +28588,10 @@ void main() {
             isMounted = true;
           });
         }
-        camera.position.y -= (scrollY * 1e-3 + camera.position.y) * 0.3;
-        if (typeof elapsed === "number") {
-          group.rotation.y = -0.01 * elapsed / 1e3;
-        }
+        camera.position.y -= (window.scrollY * 1e-3 + camera.position.y) * drag;
+        group.rotation.y = -0.01 * elapsed / 1e3;
         composer.render();
+        previousElapsed = elapsed;
       }
     }
   }

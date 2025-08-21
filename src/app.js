@@ -129,7 +129,7 @@ export default function App(domElement) {
   }
 
   function mount() {
-    // Create a temporary element to calculate lvw/lvh values
+    let previousElapsed = 0;
     const temp = document.createElement('div');
     temp.style.width = '100lvw';
     temp.style.height = '100lvh';
@@ -143,9 +143,6 @@ export default function App(domElement) {
     const scene = new Scene();
     const group = new Group();
     const camera = new PerspectiveCamera(50);
-    let scrollY = 0;
-    let isScrolling = false;
-    let scrollTimeout;
 
     renderer.setClearColor(background);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -200,7 +197,6 @@ export default function App(domElement) {
 
     domElement.appendChild(renderer.domElement);
     window.addEventListener('resize', resize);
-    window.addEventListener('scroll', onScroll, { passive: true });
     resize();
 
     renderer.setAnimationLoop(update);
@@ -210,20 +206,7 @@ export default function App(domElement) {
       domElement.removeChild(renderer.domElement);
       renderer.setAnimationLoop(null);
       window.removeEventListener('resize', resize);
-      window.removeEventListener('scroll', onScroll);
       composer.dispose();
-    }
-
-    function onScroll() {
-      scrollY = window.scrollY;
-      if (!isScrolling) {
-        isScrolling = true;
-        update();
-      }
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        isScrolling = false;
-      }, 100);
     }
 
     function resize() {
@@ -240,6 +223,8 @@ export default function App(domElement) {
     }
 
     function update(elapsed) {
+      const timeDelta = elapsed - previousElapsed;
+      const drag = timeDelta / 25;
       if (group.children.length < 50) {
         h = clamp(baseHue + 0.5 * Math.random() - 0.25, 0, 1);
         s = 1;
@@ -280,11 +265,10 @@ export default function App(domElement) {
           isMounted = true;
         });
       }
-      camera.position.y -= (scrollY * 0.001 + camera.position.y) * 0.3;
-      if (typeof elapsed === 'number') {
-        group.rotation.y = (-0.01 * elapsed) / 1000;
-      }
+      camera.position.y -= (window.scrollY * 0.001 + camera.position.y) * drag;
+      group.rotation.y = (-0.01 * elapsed) / 1000;
       composer.render();
+      previousElapsed = elapsed;
     }
   }
 }
